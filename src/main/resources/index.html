@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users App</title>
+</head>
+<body>
+
+<h1>Number of users: <span id="count">0</span></h1>
+
+<h2>Add/edit user</h2>
+
+<form id="form">
+    <input id="firstName" placeholder="First name" required>
+    <input id="lastName" placeholder="Last name" required>
+    <input id="age" type="number" placeholder="Age" required>
+
+    <input type="hidden" id="userId">
+
+    <button id="submitBtn">Add</button>
+</form>
+
+<h2>Users</h2>
+<ul id="list"></ul>
+
+<script>
+    let editMode = false;
+
+    async function load() {
+        const res = await fetch('/users');
+        const users = await res.json();
+
+        document.getElementById('count').innerText = users.length;
+
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+
+        users.forEach(u => {
+            const li = document.createElement('li');
+            li.innerText = `${u.id}: ${u.firstName} ${u.lastName} (${u.age}) `;
+
+            // EDIT
+            const editBtn = document.createElement('button');
+            editBtn.innerText = 'Edit';
+            editBtn.onclick = () => {
+                firstName.value = u.firstName;
+                lastName.value = u.lastName;
+                age.value = u.age;
+                userId.value = u.id;
+
+                editMode = true;
+                submitBtn.innerText = 'Save';
+            };
+
+            // DELETE
+            const delBtn = document.createElement('button');
+            delBtn.innerText = 'Delete';
+            delBtn.onclick = async () => {
+                await fetch(`/users/${u.id}`, {
+                    method: 'DELETE'
+                });
+                load();
+            };
+
+            li.appendChild(editBtn);
+            li.appendChild(delBtn);
+            list.appendChild(li);
+        });
+    }
+
+    document.getElementById('form').onsubmit = async (e) => {
+        e.preventDefault();
+
+        const user = {
+            firstName: firstName.value,
+            lastName: lastName.value,
+            age: parseInt(age.value)
+        };
+
+        const id = userId.value;
+
+        if (editMode) {
+            await fetch(`/users/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            });
+
+            editMode = false;
+            submitBtn.innerText = 'Add';
+            userId.value = '';
+        } else {
+            await fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            });
+        }
+
+        e.target.reset();
+        load();
+    };
+
+    load();
+</script>
+
+</body>
+</html>
