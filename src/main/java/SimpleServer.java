@@ -29,7 +29,7 @@ public class SimpleServer
                     {
                         request = in.readLine();
 
-                        if(request.equalsIgnoreCase("end")) {
+                        if(request == null || request.equalsIgnoreCase("end")) {
                             break;
                         } else if(request.equalsIgnoreCase("end-server")) {
                             System.out.println("Shutting down the server...");

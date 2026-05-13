@@ -6,7 +6,7 @@ public class SimpleClient
 {
     static void main(String[] args)
     {
-        int port = args.length > 0 ? Integer.parseInt(args[0]) : 5678;
+        int port = args.length > 0 ? Integer.parseInt(args[0]) : 5679;
 
         try(Socket client = new Socket("localhost", port))
         {
